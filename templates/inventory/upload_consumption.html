@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Upload Consumption File — Stock Ledger{% endblock %}
+{% block content %}
+<h1>Upload Consumption File</h1>
+<p class="subtitle">Upload the daily ticket export (.xlsx). Rows are matched to warehouses and materials automatically,
+  cancelled tickets are excluded, and matched rows roll straight into today's stock consumption.</p>
+
+<div class="panel">
+  <form method="post" enctype="multipart/form-data" style="display:flex; gap:10px; align-items:flex-end;">
+    {% csrf_token %}
+    <div>{{ form.file }}</div>
+    <button type="submit" class="primary-btn">Upload &amp; Process</button>
+  </form>
+</div>
+
+<div class="panel">
+  <div class="panel-title">Recent Uploads</div>
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>Uploaded</th>
+          <th>By</th>
+          <th>Status</th>
+          <th>Total Rows</th>
+          <th>Matched</th>
+          <th>Unmatched</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in uploads %}
+        <tr>
+          <td>{{ u.uploaded_at }}</td>
+          <td>{{ u.uploaded_by }}</td>
+          <td>{{ u.status }}</td>
+          <td class="mono">{{ u.total_rows }}</td>
+          <td class="mono received">{{ u.matched_rows }}</td>
+          <td class="mono consumed">{{ u.unmatched_rows }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" style="text-align:center; color:var(--muted2); padding:20px 0;">No uploads yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if unmatched_preview %}
+<div class="panel">
+  <div class="panel-title badge-warning">Unmatched rows needing review</div>
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Vendor</th>
+          <th>POD Station</th>
+          <th>Raw Material</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in unmatched_preview %}
+        <tr>
+          <td>{{ r.date }}</td>
+          <td>{{ r.vendor }}</td>
+          <td>{{ r.pod_station_name }}</td>
+          <td>{{ r.raw_material_text }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Stock Ledger{% endblock %}
+{% block content %}
+<h1>Overview</h1>
+<p class="subtitle">Network-wide snapshot across all vendors and warehouses.</p>
+
+<div class="card-grid">
+  <div class="stat-card">
+    <div class="stat-value">{{ total_warehouses }}</div>
+    <div class="stat-label">Warehouses</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ total_materials }}</div>
+    <div class="stat-label">Materials Tracked</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ todays_entries }}</div>
+    <div class="stat-label">Stock Entries Today</div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-title">Recent Consumption Uploads</div>
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>Uploaded</th>
+          <th>By</th>
+          <th>Status</th>
+          <th>Matched</th>
+          <th>Unmatched</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in recent_uploads %}
+        <tr>
+          <td>{{ u.uploaded_at }}</td>
+          <td>{{ u.uploaded_by }}</td>
+          <td>{{ u.status }}</td>
+          <td class="mono received">{{ u.matched_rows }}</td>
+          <td class="mono consumed">{{ u.unmatched_rows }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" style="text-align:center; color:var(--muted2); padding:20px 0;">No uploads yet — go to Upload
+            Consumption File.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

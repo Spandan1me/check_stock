@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Daily Entry — Stock Ledger{% endblock %}
+{% block content %}
+<h1>Daily Entry</h1>
+<p class="subtitle">Opening stock auto-fills from yesterday's closing balance — record what's received and consumed
+  today.</p>
+
+<div class="panel">
+  <form method="get" class="inline-filters">
+    <div>
+      <label>Date</label>
+      <input type="date" name="date" value="{{ date }}" max="{% now 'Y-m-d' %}" onchange="this.form.submit()">
+    </div>
+    {% if all_warehouses %}
+    <div>
+      <label>Warehouse</label>
+      <select name="warehouse" onchange="this.form.submit()">
+        {% for wh in all_warehouses %}
+        <option value="{{ wh.id }}" {% if wh.id == warehouse.id %}selected{% endif %}>{{ wh.name }} — {{ wh.vendor }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    {% endif %}
+  </form>
+
+  <div class="panel-title">{{ warehouse.name }} <span class="pill">{{ warehouse.vendor }}</span> <span class="pill">{{
+      warehouse.region }}</span></div>
+
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>Material</th>
+          <th>Opening</th>
+          <th>Received</th>
+          <th>Consumed</th>
+          <th>Closing</th>
+          <th>Note</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="material" value="{{ row.material.id }}">
+            <td>{{ row.material.name }} <span class="pill">{{ row.material.unit }}</span></td>
+            <td><input type="number" step="0.01" name="opening" value="{{ row.opening }}" style="width:90px;"></td>
+            <td><input type="number" step="0.01" name="received" value="{{ row.received }}" style="width:90px;"
+                class="received"></td>
+            <td><input type="number" step="0.01" name="consumed" value="{{ row.consumed }}" style="width:90px;"
+                class="consumed"></td>
+            <td class="mono">{{ row.closing }}</td>
+            <td><input type="text" name="note" value="{{ row.note }}" style="width:140px;" placeholder="optional"></td>
+            <td style="display:flex; gap:6px;">
+              <button type="submit" name="action" value="save" class="primary-btn">Save</button>
+              {% if user.is_admin_role %}
+              <button type="submit" name="action" value="clear" class="ghost-btn" style="width:auto;"
+                onclick="return confirm('Clear this entry for {{ row.material.name }} on {{ date }}? This cannot be undone.');">Clear</button>
+              {% endif %}
+            </td>
+          </form>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" style="text-align:center; color:var(--muted2); padding:24px 0;">No materials defined yet — ask
+            the admin to add some under Manage Materials.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

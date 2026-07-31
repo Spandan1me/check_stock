@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Stock Ledger{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+  <button class="menu-toggle" aria-label="Toggle menu">☰</button>
+  {% if user.is_authenticated %}
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="mark">&#11040;</span>
+        <div>
+          <div class="brand-title">STOCK LEDGER</div>
+          <div class="brand-sub">Material · Vendor · Warehouse</div>
+        </div>
+      </div>
+      <nav>
+        {% if user.is_admin_role %}
+        <a href="{% url 'inventory:admin_dashboard' %}"
+          class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">Dashboard</a>
+        {% endif %}
+        <a href="{% url 'inventory:stock_entry' %}"
+          class="{% if request.resolver_match.url_name == 'stock_entry' %}active{% endif %}">Daily Entry</a>
+        <a href="{% url 'inventory:stock_register' %}"
+          class="{% if request.resolver_match.url_name == 'stock_register' %}active{% endif %}">Stock Register</a>
+        <a href="{% url 'inventory:consumption_report' %}"
+          class="{% if request.resolver_match.url_name == 'consumption_report' %}active{% endif %}">Consumption
+          Reports</a>
+        {% if user.is_admin_role %}
+        <a href="{% url 'inventory:upload_consumption' %}"
+          class="{% if request.resolver_match.url_name == 'upload_consumption' %}active{% endif %}">Upload Consumption
+          File</a>
+        <a href="/django-admin/">Manage Materials / Vendors</a>
+        {% endif %}
+      </nav>
+      <div class="sidebar-footer">
+        <form action="{% url 'logout' %}" method="post">{% csrf_token %}
+          <button type="submit" class="ghost-btn">Log out ({{ user.username }})</button>
+        </form>
+      </div>
+    </aside>
+    <main class="main">
+      <div class="topbar">
+        <div class="eyebrow">DAILY MATERIAL &amp; STOCK TRACKING</div>
+        <div class="role-chip">{{ user.get_role_display }}{% if user.warehouse %} · {{ user.warehouse }}{% endif %}
+        </div>
+      </div>
+      <div class="content">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="toast {% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+  </div>
+  {% else %}
+  {% block full %}{% endblock %}
+  {% endif %}
+  <script src="{% static 'js/responsive.js' %}"></script>
+</body>
+
+</html>

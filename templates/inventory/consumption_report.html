@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Consumption Reports — Stock Ledger{% endblock %}
+{% block content %}
+<h1>Consumption Reports</h1>
+<p class="subtitle">Daily, weekly, 10-day, and monthly average consumption, computed from uploaded ticket data.</p>
+
+<div class="panel">
+  <form method="get" class="inline-filters">
+    {% if warehouses|length > 1 %}
+    <div><label>Warehouse</label><select name="warehouse"
+        onchange="document.querySelector('[name=pod_station]').value=''; this.form.submit();">
+        <option value="">All</option>
+        {% for wh in warehouses %}
+        <option value="{{ wh.id }}" {% if request.GET.warehouse==wh.id|stringformat:"s" %}selected{% endif %}>{{ wh.name
+          }}</option>
+        {% endfor %}
+      </select></div>
+    {% endif %}
+    <div><label>POD Station</label><select name="pod_station" onchange="this.form.submit()">
+        <option value="">All</option>
+        {% for p in pod_stations %}
+        <option value="{{ p.name }}" {% if request.GET.pod_station==p.name %}selected{% endif %}>{{ p.name }}</option>
+        {% endfor %}
+      </select></div>
+    <div><label>Material</label><select name="material" onchange="this.form.submit()">
+        <option value="">All</option>
+        {% for m in materials %}
+        <option value="{{ m.id }}" {% if request.GET.material==m.id|stringformat:"s" %}selected{% endif %}>{{ m.name }}
+        </option>
+        {% endfor %}
+      </select></div>
+  </form>
+</div>
+
+<div class="card-grid">
+  {% for s in summary %}
+  <div class="stat-card">
+    <div class="stat-value">{{ s.avg_per_day }}</div>
+    <div class="stat-label">{{ s.label }} — total {{ s.total }} over {{ s.days }}d</div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="panel">
+  <div class="panel-title">Top Consumed Materials (last 30 days)</div>
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>Material</th>
+          <th>Total Consumed</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in by_material %}
+        <tr>
+          <td>{{ m.material__name }}</td>
+          <td class="mono consumed">{{ m.total }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="2" style="text-align:center; color:var(--muted2); padding:20px 0;">No consumption data yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-title">By POD Station, Type &amp; Material (last 30 days)</div>
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>POD Station</th>
+          <th>Type</th>
+          <th>Material</th>
+          <th>Quantity</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in by_type %}
+        <tr>
+          <td>{{ t.pod_station_name|default:"—" }}</td>
+          <td>{{ t.raw_type_text }}</td>
+          <td>{{ t.material__name|default:"— unmatched —" }}</td>
+          <td class="mono consumed">{{ t.total }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" style="text-align:center; color:var(--muted2); padding:20px 0;">No data yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-title">Daily Consumption (last 30 days)</div>
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Total Consumed</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in daily_series %}
+        <tr>
+          <td>{{ d.date }}</td>
+          <td class="mono consumed">{{ d.total }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="2" style="text-align:center; color:var(--muted2); padding:20px 0;">No data yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
