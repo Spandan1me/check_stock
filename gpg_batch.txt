@@ -1,0 +1,9 @@
+%echo Generating a standard key
+Key-Type: EDDSA
+Key-Curve: ed25519
+Name-Real: SpandanGairhe
+Name-Email: spandangairhe567@gmail.com
+Expire-Date: 0
+%no-protection
+%commit
+%echo done
